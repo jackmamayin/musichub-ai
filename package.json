@@ -1,0 +1,78 @@
+{
+  "name": "musichub-ai-v1.0-cloudflare",
+  "version": "1.0.0-final13",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "opennextjs-cloudflare build",
+    "start": "next start",
+    "worker": "tsx worker/generation-worker.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "seed": "tsx prisma/seed.ts",
+    "cleanup": "tsx scripts/cleanup.mjs",
+    "cf:build": "npm run cf:install && opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare preview",
+    "cf:deploy": "npm run deploy",
+    "cf:typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "cf:migrate": "opennextjs-cloudflare migrate",
+    "cf:queue:create": "wrangler queues create musichub-generation",
+    "cf:consumer:deploy": "wrangler deploy --config queue-consumer.wrangler.jsonc",
+    "cf:deploy:all": "npm run prisma:generate && npm run cf:build && npm run deploy",
+    "cf:hyperdrive:create": "wrangler hyperdrive create musichub-db --connection-string=\"$DATABASE_URL\"",
+    "cf:hyperdrive:validate": "wrangler hyperdrive get \"$HYPERDRIVE_ID\"",
+    "cf:preflight": "node scripts/cloudflare-preflight.mjs",
+    "cf:bootstrap": "bash scripts/cf-bootstrap.sh",
+    "cf:deploy:production": "npm run cf:preflight && npm run prisma:generate && npm run cf:build && npm run deploy",
+    "analytics:smoke": "node scripts/analytics-smoke.mjs",
+    "cf:one-click:check": "node scripts/one-click-check.mjs",
+    "cf:one-click": "bash scripts/one-click-deploy.sh",
+    "cf:provision": "bash scripts/provision-cloudflare.sh",
+    "deploy": "node scripts/cf-deploy.mjs",
+    "cf:install": "npm install --no-package-lock --no-audit --no-fund",
+    "build:next": "prisma generate && next build"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.879.0",
+    "@aws-sdk/s3-request-presigner": "^3.879.0",
+    "@prisma/client": "^6.15.0",
+    "next": "^15.5.2",
+    "prisma": "^6.15.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "stripe": "^18.5.0",
+    "zod": "^4.1.5",
+    "@prisma/adapter-pg": "^6.15.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.2",
+    "@opennextjs/cloudflare": "1.20.6",
+    "wrangler": "4.135.0",
+    "@types/pg": "^8.15.5"
+  },
+  "cloudflare": {
+    "bindings": {
+      "ELEVENLABS_API_KEY": {
+        "description": "ElevenLabs API key used to generate music."
+      },
+      "STRIPE_SECRET_KEY": {
+        "description": "Stripe secret key for payments and subscriptions."
+      },
+      "STRIPE_WEBHOOK_SECRET": {
+        "description": "Stripe webhook signing secret."
+      },
+      "RESEND_API_KEY": {
+        "description": "Resend API key for email verification."
+      },
+      "CRON_SECRET": {
+        "description": "Random secret used to protect maintenance endpoints."
+      }
+    }
+  },
+  "packageManager": "npm@10.9.2"
+}

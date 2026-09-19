@@ -1,0 +1,3 @@
+'use client';
+import {useEffect,useState} from 'react';
+export default function Dashboard(){const [d,setD]=useState<any>(); useEffect(()=>{fetch('/api/usage').then(r=>r.json()).then(setD)},[]); if(!d)return <main><h1>Dashboard</h1><p>Loading...</p></main>; return <main><h1>我的 Dashboard</h1><p>{d.user.email} · {d.user.plan}</p><h2>Credits：{d.user.credits}</h2><h2>订阅</h2><pre>{JSON.stringify(d.subscription,null,2)}</pre><h2>最近生成</h2>{d.generations.map((g:any)=><div key={g.id} style={{marginBottom:12}}><b>{g.status}</b> · {g.durationSec}s · {g.creditsCharged} credits<br/>{g.prompt}</div>)}</main>}

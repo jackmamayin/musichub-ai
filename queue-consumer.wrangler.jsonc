@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "musichub-generation-consumer",
+  "main": "queue-consumer.ts",
+  "compatibility_date": "2026-09-19",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "services": [
+    {
+      "binding": "MUSICHUB_APP",
+      "service": "musichub-ai"
+    }
+  ],
+  "queues": {
+    "consumers": [
+      {
+        "queue": "musichub-generation",
+        "max_batch_size": 5,
+        "max_batch_timeout": 10,
+        "max_retries": 5,
+        "dead_letter_queue": "musichub-generation-dlq"
+      }
+    ]
+  },
+  "vars": {}
+}

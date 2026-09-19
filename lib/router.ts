@@ -1,0 +1,3 @@
+import {db} from "./db";import {ElevenMusicProvider} from "./providers/elevenlabs";import type {ProviderMode} from "./provider";
+export async function candidates(mode:ProviderMode){const ps=await db.provider.findMany({where:{enabled:true,circuitOpen:false},include:{models:{where:{enabled:true}}}});return ps.map(p=>({p,score:(mode==="pro"?p.qualityScore:mode==="fast"?p.latencyScore:(p.qualityScore+p.latencyScore)/2)*.55+Math.min(1,p.successRate)*.3+(1-Math.min(1,p.costPerMinute/.3))*.15})).sort((a,b)=>b.score-a.score);}
+export async function providerFor(id:string){if(id==="elevenlabs")return new ElevenMusicProvider();throw new Error(`No adapter for ${id}`);}

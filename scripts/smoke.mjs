@@ -1,0 +1,1 @@
+const base=process.env.APP_URL||"http://localhost:3000";for(const p of ["/api/health","/robots.txt","/sitemap.xml","/pricing"]){const r=await fetch(base+p);console.log(p,r.status)}

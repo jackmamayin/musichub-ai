@@ -1,0 +1,4 @@
+import {db} from "./db";import {candidates,providerFor} from "./router";import type {ProviderMode} from "./provider";
+async function success(id:string){await db.provider.update({where:{id},data:{successCount:{increment:1},successRate:.99,circuitOpen:false}});}
+async function failure(id:string){const p=await db.provider.update({where:{id},data:{failureCount:{increment:1},lastFailureAt:new Date()}});if(p.failureCount>=5)await db.provider.update({where:{id},data:{circuitOpen:true}});}
+export async function tryGenerateWithFallback(x:{prompt:string;durationSec:number;mode:ProviderMode}){let last:any;for(const{p}of await candidates(x.mode)){try{const out=await(await providerFor(p.id)).generate(x);await success(p.id);return{providerId:p.id,result:out};}catch(e){last=e;await failure(p.id);}}throw last||new Error("All providers failed");}

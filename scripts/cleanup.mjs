@@ -1,0 +1,1 @@
+import{PrismaClient}from"@prisma/client";const db=new PrismaClient();const email=await db.emailCode.deleteMany({where:{expiresAt:{lt:new Date()}}});console.log({expiredEmailCodes:email.count});await db.$disconnect();

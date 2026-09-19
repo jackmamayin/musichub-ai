@@ -1,0 +1,1 @@
+import{NextResponse}from"next/server";import{db}from"@/lib/db";import{requireAdmin}from"@/lib/admin";export async function GET(){if(!await requireAdmin())return NextResponse.json({error:"forbidden"},{status:403});return NextResponse.json({items:await db.provider.findMany({include:{models:true},orderBy:{createdAt:"asc"}})})}

@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0-final12",
+  "platform": "cloudflare-workers",
+  "rootDirectory": "/",
+  "buildCommand": "npm run cf:build",
+  "deployCommand": "npm run deploy",
+  "dependencyStrategy": "npm-install-without-lockfile",
+  "recommendedBuildVariable": "SKIP_DEPENDENCY_INSTALL=1",
+  "node": "24.18.0",
+  "npm": "10.9.2",
+  "wrangler": "4.135.0",
+  "openNextCloudflare": "1.20.6",
+  "hyperdrive": "runtime-id-resolution"
+}

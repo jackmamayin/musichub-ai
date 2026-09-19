@@ -1,0 +1,1 @@
+import{getCloudflareContext}from"@opennextjs/cloudflare";export async function enqueueGeneration(message:{generationId:string}){const{env}=getCloudflareContext();const q=(env as any).MUSIC_GENERATION_QUEUE;if(!q)throw new Error("MUSIC_GENERATION_QUEUE binding not configured");await q.send(message);}

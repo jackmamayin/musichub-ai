@@ -1,0 +1,260 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+enum GenerationStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum LedgerType {
+  PURCHASE
+  GENERATION_RESERVE
+  GENERATION_CAPTURE
+  REFUND
+  BONUS
+  ADJUSTMENT
+}
+
+enum Plan {
+  FREE
+  STARTER
+  PRO
+  BUSINESS
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+ id String @id @default(cuid())
+ email String @unique
+ credits Int @default(0)
+ plan Plan @default(FREE)
+ role UserRole @default(USER)
+ emailVerifiedAt DateTime?
+ createdAt DateTime @default(now())
+ generations Generation[] @relation("UserGenerations")
+ ledger CreditLedger[] @relation("UserLedger")
+ orders Order[] @relation("UserOrders")
+ subscriptions Subscription[] @relation("UserSubscriptions")
+ referralsSent Referral[] @relation("referrer")
+ referralsReceived Referral[] @relation("referred")
+ usageEvents UsageEvent[] @relation("UserUsageEvents")
+ creditGrants CreditGrant[] @relation("UserCreditGrants")
+ promoUses PromoUse[] @relation("UserPromoUses")
+ auditLogs AuditLog[] @relation("UserAuditLogs")
+ referralCode String? @unique
+}
+model Provider {
+ id String @id
+ name String
+ enabled Boolean @default(true)
+ costPerMinute Float
+ qualityScore Float @default(0.9)
+ successRate Float @default(0.99)
+ latencyScore Float @default(0.9)
+ failureCount Int @default(0)
+ successCount Int @default(0)
+ lastFailureAt DateTime?
+ circuitOpen Boolean @default(false)
+ models Model[] @relation("ProviderModels")
+ generations Generation[] @relation("ProviderGenerations")
+ costSnapshots ProviderCostSnapshot[] @relation("ProviderCostSnapshots")
+ pricingRules PricingRule[] @relation("ProviderPricingRules")
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+}
+model Model {
+ id String @id @default(cuid())
+ name String
+ providerId String
+ quality Float @default(0.9)
+ speed Float @default(0.9)
+ enabled Boolean @default(true)
+ provider Provider @relation("ProviderModels", fields:[providerId], references:[id])
+ generations Generation[] @relation("ModelGenerations")
+ pricingRules PricingRule[] @relation("ModelPricingRules")
+}
+model Generation {
+ id String @id @default(cuid())
+ userId String
+ providerId String
+ modelId String?
+ prompt String
+ durationSec Int
+ mode String
+ status GenerationStatus @default(QUEUED)
+ creditsCharged Int
+ providerCost Float @default(0)
+ paymentReserve Float @default(0)
+ infraReserve Float @default(0)
+ revenueUsd Float @default(0)
+ profitUsd Float @default(0)
+ margin Float @default(0)
+ storageKey String?
+ audioUrl String?
+ errorMessage String?
+ createdAt DateTime @default(now())
+ completedAt DateTime?
+ user User @relation("UserGenerations", fields:[userId], references:[id])
+ provider Provider @relation("ProviderGenerations", fields:[providerId], references:[id])
+ model Model? @relation("ModelGenerations", fields:[modelId], references:[id])
+}
+model CreditLedger {
+ id String @id @default(cuid())
+ userId String
+ type LedgerType
+ credits Int
+ usdValue Float
+ referenceId String?
+ createdAt DateTime @default(now())
+ user User @relation("UserLedger", fields:[userId], references:[id])
+}
+model Order {
+ id String @id @default(cuid())
+ userId String
+ stripeSessionId String @unique
+ stripeSubscriptionId String?
+ packageName String
+ credits Int
+ amountUsd Float
+ status String @default("PAID")
+ createdAt DateTime @default(now())
+ user User @relation("UserOrders", fields:[userId], references:[id])
+}
+model Referral {
+ id String @id @default(cuid())
+ referrerId String
+ referredId String @unique
+ bonusCredits Int @default(200)
+ createdAt DateTime @default(now())
+ referrer User @relation("referrer", fields:[referrerId], references:[id])
+ referred User @relation("referred", fields:[referredId], references:[id])
+}
+model PromoCode {
+ id String @id @default(cuid())
+ code String @unique
+ credits Int @default(0)
+ discountPercent Int @default(0)
+ maxUses Int?
+ usedCount Int @default(0)
+ active Boolean @default(true)
+ expiresAt DateTime?
+ uses PromoUse[]
+}
+model PromoUse {
+ id String @id @default(cuid())
+ userId String
+ promoId String
+ createdAt DateTime @default(now())
+ user User @relation("UserPromoUses", fields:[userId], references:[id])
+ promo PromoCode @relation(fields:[promoId], references:[id])
+ @@unique([userId,promoId])
+}
+model EmailCode {
+ id String @id @default(cuid())
+ email String
+ codeHash String
+ expiresAt DateTime
+ attempts Int @default(0)
+ usedAt DateTime?
+ createdAt DateTime @default(now())
+ @@index([email, expiresAt])
+}
+
+model Subscription {
+ id String @id @default(cuid())
+ userId String
+ stripeCustomerId String?
+ stripeSubscriptionId String @unique
+ plan Plan
+ status String
+ currentPeriodEnd DateTime?
+ cancelAtPeriodEnd Boolean @default(false)
+ lastInvoiceId String? @unique
+ monthlyCredits Int @default(0)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ user User @relation("UserSubscriptions", fields:[userId], references:[id])
+}
+model PricingRule {
+ id String @id @default(cuid())
+ providerId String
+ modelId String?
+ mode String
+ durationMin Int
+ durationMax Int
+ multiplier Float @default(1)
+ fixedCredits Int @default(0)
+ active Boolean @default(true)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ provider Provider @relation("ProviderPricingRules", fields:[providerId], references:[id])
+ model Model? @relation("ModelPricingRules", fields:[modelId], references:[id])
+}
+model AuditLog {
+ id String @id @default(cuid())
+ userId String?
+ action String
+ target String?
+ metadata Json?
+ createdAt DateTime @default(now())
+ user User? @relation("UserAuditLogs", fields:[userId], references:[id])
+}
+
+model UsageEvent {
+ id String @id @default(cuid())
+ userId String?
+ event String
+ value Float @default(1)
+ metadata Json?
+ createdAt DateTime @default(now())
+ user User? @relation("UserUsageEvents", fields:[userId], references:[id])
+ @@index([event, createdAt])
+ @@index([userId, createdAt])
+}
+
+model CreditGrant {
+ id String @id @default(cuid())
+ userId String
+ source String
+ credits Int
+ periodKey String?
+ stripeInvoiceId String?
+ createdAt DateTime @default(now())
+ user User @relation("UserCreditGrants", fields:[userId], references:[id])
+ @@index([userId, source, periodKey])
+ @@index([userId, createdAt])
+}
+
+model ProviderCostSnapshot {
+ id String @id @default(cuid())
+ providerId String
+ costPerMinute Float
+ source String
+ createdAt DateTime @default(now())
+ provider Provider @relation("ProviderCostSnapshots", fields:[providerId], references:[id])
+ @@index([providerId, createdAt])
+}
+
+model Alert {
+ id String @id @default(cuid())
+ type String
+ severity String @default("WARN")
+ message String
+ resolvedAt DateTime?
+ createdAt DateTime @default(now())
+ @@index([type, createdAt])
+}

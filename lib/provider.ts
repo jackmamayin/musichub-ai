@@ -1,0 +1,1 @@
+export type ProviderMode="fast"|"balanced"|"pro";export type ProviderResult={audio:Uint8Array;mimeType:string;estimatedCost:number};export interface MusicProvider{id:string;generate(x:{prompt:string;durationSec:number;mode:ProviderMode}):Promise<ProviderResult>;}

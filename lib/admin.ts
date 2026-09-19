@@ -1,0 +1,1 @@
+import{currentUser}from"@/lib/auth";export async function requireAdmin(){const u=await currentUser();const allow=(process.env.ADMIN_EMAILS||process.env.ADMIN_EMAIL||"").split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);if(!u||((u as any).role!=="ADMIN"&&!allow.includes(u.email.toLowerCase())))return null;return u}

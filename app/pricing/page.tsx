@@ -1,0 +1,1 @@
+export default function Pricing(){return <main><h1>MusicHub AI Pricing</h1><p>AI music generation for creators, agencies and products.</p><div className="grid">{[["Basic","$9.99/month"],["Pro","$24.99/month"],["Business","$59.99/month"]].map(x=><div className="card" key={x[0]}><h2>{x[0]}</h2><div className="price">{x[1]}</div><p>Credits、商业化工作流、优先生成能力。</p></div>)}</div></main>}

@@ -1,0 +1,1 @@
+import"./globals.css";import type{Metadata}from"next";export const metadata:Metadata={title:{default:"MusicHub AI · AI Music Generator",template:"%s · MusicHub AI"},description:"AI音乐生成平台：生成背景音乐、歌曲、广告音乐与视频配乐。",robots:{index:true,follow:true}};export default function Layout({children}:{children:React.ReactNode}){return <html lang="zh-CN"><body>{children}</body></html>}

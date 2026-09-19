@@ -1,0 +1,22 @@
+# v1.0 Release Checklist
+
+- [ ] PostgreSQL production database reachable through Hyperdrive
+- [ ] Prisma migrations applied
+- [ ] R2 audio and cache buckets exist
+- [ ] KV namespace ID configured
+- [ ] Generation queue + DLQ configured
+- [ ] Analytics Engine dataset binding configured
+- [ ] Stripe production keys + webhook configured
+- [ ] AI provider production key configured
+- [ ] Resend production sender/domain configured
+- [ ] `CRON_SECRET` configured
+- [ ] GitHub Actions Cloudflare secrets configured
+- [ ] `/api/health` returns OK
+- [ ] Login email delivery works
+- [ ] Generation succeeds and queue consumer processes it
+- [ ] R2 playback/download works
+- [ ] Subscription invoice webhook grants credits once
+- [ ] `/dashboard` shows usage and credits
+- [ ] Admin alerts visible
+- [ ] Terms / Privacy / Copyright pages reviewed
+- [ ] Custom domain + HTTPS verified

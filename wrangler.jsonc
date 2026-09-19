@@ -1,0 +1,67 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "musichub-ai",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-19",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "musichub-ai"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MUSICHUB_AUDIO",
+      "bucket_name": "musichub-audio"
+    },
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "musichub-next-cache"
+    }
+  ],
+  "vars": {
+    "CLOUDFLARE_DEPLOYMENT": "1"
+  },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "",
+      "localConnectionString": "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT_KV",
+      "id": "020670a482654ad5bdefdd888ff85cbc"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "queue": "musichub-generation",
+        "binding": "MUSIC_GENERATION_QUEUE"
+      }
+    ]
+  },
+  "observability": {
+    "enabled": true
+  },
+  "analytics_engine_datasets": [
+    {
+      "binding": "MUSICHUB_ANALYTICS",
+      "dataset": "musichub_events"
+    }
+  ],
+  "triggers": {
+    "crons": [
+      "0 3 * * *"
+    ]
+  }
+}
